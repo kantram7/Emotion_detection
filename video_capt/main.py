@@ -11,6 +11,28 @@ face_classifier = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_fro
 model_state = torch.load("./emotion_detection_model_state.pth", map_location=torch.device('cpu'))
 class_labels = ['Angry', 'Disgust', 'Fear', 'Happy', 'Neutral', 'Sad', 'Surprise']
 
+masks = {
+    'Angry': 'Bad',
+    'Disgust': 'Bad',
+    'Fear': 'Neutral',
+    'Happy': 'Happy',
+    'Neutral': 'Neutral',
+    'Sad': 'Bad',
+    'Surprise': 'Neutral'
+}
+
+mask_labels = {
+    0: 1,
+    1: 1,
+    2: 0,
+    3: 2,
+    4: 0,
+    5: 1,
+    6: 0
+}
+
+mask_labels_names = list(set(masks.values()))
+
 
 def conv_block(in_channels, out_channels, pool=False):
     layers = [
@@ -90,11 +112,12 @@ while True:
             tensor = model(roi)
             pred = torch.max(tensor, dim=1)[1].tolist()
             label = class_labels[pred[0]]
+            main_mask = masks[label]
 
             label_position = (x, y)
             cv2.putText(
                 frame,
-                label,
+                main_mask,
                 label_position,
                 cv2.FONT_HERSHEY_COMPLEX,
                 1,
